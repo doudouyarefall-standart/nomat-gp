@@ -349,8 +349,37 @@ T_.readability=function(e,t){var n=T_(e),r=T_(t);return(Math.max(n.getLuminance(
             <span data-i18n="HERO_BADGE_FAST">Service rapide</span>
           </span>
         </div>
+        <!-- Drapeaux des 3 pays desservis -->
+        <div class="flex items-center gap-2 mt-2">
+          <span title="Sénégal" class="inline-flex overflow-hidden rounded shadow-sm" style="border:1px solid var(--border);">
+            <!-- Drapeau Sénégal : vert/jaune/rouge vertical -->
+            <span style="display:inline-flex; width:24px; height:16px;">
+              <span style="flex:1; background:#00853F;"></span>
+              <span style="flex:1; background:#FDEF42; position:relative;">
+                <span style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:5px; height:5px; background:#00853F; border-radius:50%;"></span>
+              </span>
+              <span style="flex:1; background:#E31B23;"></span>
+            </span>
+          </span>
+          <span title="États-Unis" class="inline-flex overflow-hidden rounded shadow-sm" style="border:1px solid var(--border);">
+            <!-- Drapeau USA simplifié -->
+            <span style="display:inline-block; width:32px; height:16px; background:linear-gradient(to bottom, #B22234 0 12%, white 12% 25%, #B22234 25% 37%, white 37% 50%, #B22234 50% 62%, white 62% 75%, #B22234 75% 87%, white 87% 100%); position:relative;">
+              <span style="position:absolute; left:0; top:0; width:12px; height:9px; background:#3C3B6E;"></span>
+            </span>
+          </span>
+          <span title="Canada" class="inline-flex overflow-hidden rounded shadow-sm" style="border:1px solid var(--border);">
+            <!-- Drapeau Canada : rouge/blanc/rouge vertical avec feuille -->
+            <span style="display:inline-flex; width:28px; height:16px;">
+              <span style="flex:1; background:#FF0000;"></span>
+              <span style="flex:1.5; background:#FFFFFF; position:relative;">
+                <span style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:#FF0000; font-size:9px; line-height:1;">🍁</span>
+              </span>
+              <span style="flex:1; background:#FF0000;"></span>
+            </span>
+          </span>
+        </div>
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]">
-          <span data-i18n="HERO_TITLE_LINE1">Envoyez vos colis vers</span>
+          <span data-i18n="HERO_TITLE_LINE1">Colis sans frontières</span>
           <span class="block mt-2">
             <span class="text-gold" data-i18n="HERO_ROUTE_NY">New York</span>
             <span class="opacity-40 mx-3">•</span>
@@ -886,6 +915,27 @@ T_.readability=function(e,t){var n=T_(e),r=T_(t);return(Math.max(n.getLuminance(
   </div>
 </section>
 
+
+<!-- ============ CTA ROUGE FINAL ============ -->
+<section class="py-12 md:py-20" style="background: linear-gradient(135deg, #B91C1C 0%, #7F1D1D 100%); position:relative; overflow:hidden;">
+  <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 30%, white 1px, transparent 1px); background-size: 30px 30px;"></div>
+  <div class="container relative mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <p class="text-xs md:text-sm font-bold uppercase tracking-widest text-white/80 mb-3" data-i18n="CTA_RED_EYEBROW">Prêt à expédier ?</p>
+    <h2 class="text-3xl md:text-5xl font-black text-white mb-4" data-i18n="CTA_RED_TITLE">Réservez votre envoi dès aujourd'hui</h2>
+    <p class="text-base md:text-lg text-white/90 max-w-2xl mx-auto mb-8" data-i18n="CTA_RED_DESC">Tarif unique 20$/KG, départs Mardi & Jeudi, suivi en temps réel. Réservez en 2 minutes.</p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="#reserver" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-white text-red-700 font-bold text-base hover:bg-white/90 transition-colors shadow-lg">
+        <span data-i18n="CTA_RED_BTN_BOOK">Réserver mon envoi</span>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
+      <a href="https://wa.me/221773419804" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border-2 border-white text-white font-bold text-base hover:bg-white/10 transition-colors">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.673c-1.826 0-3.594-.489-5.156-1.412l-.37-.222-2.31.606.617-2.255-.241-.371a8.922 8.922 0 0 1-1.364-4.764c0-4.915 4-8.915 8.916-8.915 2.383 0 4.624.929 6.293 2.602a8.845 8.845 0 0 1 2.602 6.293c0 4.916-4 8.916-8.916 8.916m5.452-15.012A11.087 11.087 0 0 0 12.05 0C5.494 0 .16 5.333.157 11.89c0 2.096.548 4.142 1.592 5.965L0 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.557 0 11.891-5.333 11.893-11.891a11.821 11.821 0 0 0-3.487-8.413z"/></svg>
+        <span data-i18n="CTA_RED_BTN_WA">WhatsApp</span>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ============ FOOTER ============ -->
 <footer class="border-t mt-auto" style="background: linear-gradient(to bottom, var(--bg), rgba(0,0,0,0.1)); border-color: var(--border);">
   <div class="border-b" style="border-color: var(--border);">
@@ -1011,7 +1061,7 @@ const I18N = {
   HEADER_CTA_SHORT: { fr: "Réserver", en: "Book" },
   HERO_BADGE_SECURE: { fr: "Transport sécurisé", en: "Secure transport" },
   HERO_BADGE_FAST: { fr: "Service rapide", en: "Fast service" },
-  HERO_TITLE_LINE1: { fr: "Envoyez vos colis vers", en: "Send your parcels to" },
+  HERO_TITLE_LINE1: { fr: "Colis sans frontières", en: "Parcels without borders" },
   HERO_TITLE_LINE2_FROM: { fr: "depuis", en: "from" },
   HERO_SUBTITLE: { fr: "NOMAT GP, votre partenaire de transport de confiance. Spécialiste du groupage aérien entre le Sénégal, les États-Unis et le Canada — départs chaque Mardi et Jeudi à seulement 20$/KG.", en: "NOMAT GP, your trusted transport partner. Air freight specialist between Senegal, USA and Canada — departures every Tuesday and Thursday at only $20/KG." },
   HERO_CTA_BOOK: { fr: "Réserver mon envoi", en: "Book my shipment" },
@@ -1041,12 +1091,12 @@ const I18N = {
   SERVICES_EYEBROW: { fr: "Nos services", en: "Our services" },
   SERVICES_TITLE: { fr: "Une solution complète pour vos envois", en: "A complete solution for your shipments" },
   SERVICES_INTRO: { fr: "De l'enlèvement à la livraison finale, NOMAT GP vous accompagne à chaque étape de votre expédition entre le Sénégal, les États-Unis et le Canada.", en: "From pickup to final delivery, NOMAT GP supports you at every step of your shipment between Senegal, USA and Canada." },
-  PRICING_BANNER: { fr: "Tarif unique, sans frais cachés", en: "Flat rate, no hidden fees" },
+  PRICING_BANNER: { fr: "À partir de 20$/KG — sans frais cachés", en: "From $20/KG — no hidden fees" },
   PRICING_EYEBROW: { fr: "Tarification", en: "Pricing" },
   PRICING_TITLE: { fr: "Un tarif simple, juste, transparent", en: "A simple, fair, transparent rate" },
   PRICING_INTRO: { fr: "Pas de frais cachés, pas de surprise à l'arrivée. Le prix est calculé au poids réel pesé en votre présence au dépôt.", en: "No hidden fees, no surprises on arrival. Price is calculated on the real weight weighed in your presence at the depot." },
   SCHEDULE_EYEBROW: { fr: "Planning des vols", en: "Flight schedule" },
-  SCHEDULE_BANNER: { fr: "Mardi & Jeudi — départs directs Dakar → New York → Montréal", en: "Tuesday & Thursday — direct flights Dakar → New York → Montreal" },
+  SCHEDULE_BANNER: { fr: "Mardi → New York • Jeudi → Montréal", en: "Tuesday → New York • Thursday → Montreal" },
   TRACK_EYEBROW: { fr: "Suivi de colis", en: "Parcel tracking" },
   TRACK_BANNER: { fr: "De la réception à la livraison, suivez chaque étape", en: "From reception to delivery, track every step" },
   WHY_EYEBROW: { fr: "Pourquoi nous choisir", en: "Why choose us" },
