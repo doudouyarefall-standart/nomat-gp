@@ -714,16 +714,52 @@ T_.readability=function(e,t){var n=T_(e),r=T_(t);return(Math.max(n.getLuminance(
       <button onclick="resetBooking()" class="mt-4 px-4 py-2 rounded-md border border-gold text-gold hover:bg-gold/10">Nouvelle réservation</button>
       </div>
       <script>
-      function initiateBictorysPayment() {
-        // TODO [PROD] : Brancher la vraie API Bictorys ici
-        // Étapes d'intégration :
-        // 1. Récupérer la référence + montant de la réservation courante
-        // 2. POST https://api.bictorys.com/v1/checkout/intent
-        //    Body: { amount, currency: 'USD', reference, customer_email, return_url, webhook_url }
-        //    Headers: Authorization: Bearer <BICTORYS_API_KEY>
-        // 3. Rediriger vers checkout.bictorys.com/... (URL retournée par l'API)
-        // 4. Sur retour, vérifier le statut via webhook + mettre à jour statutPaiement
-        alert('💳 Intégration Bictorys en attente.\\n\\nPour activer le paiement en ligne réel, fournissez :\\n- La clé API Bictorys\\n- L\\'URL de webhook\\n\\nEn attendant, réglez par Wave/Djamo/Orange Money ou espèces au dépôt.');
+      async function initiateBictorysPayment() {
+        const ref = document.getElementById('success-ref')?.textContent?.trim();
+        if (!ref) {
+          alert('⚠️ Aucune réservation à payer. Veuillez d\\'abord confirmer une réservation.');
+          return;
+        }
+
+        const btn = event?.target || document.querySelector('button[onclick*="initiateBictorysPayment"]');
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = 'Traitement...';
+        }
+
+        try {
+          const res = await fetch('/api/bictorys/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reference: ref })
+          });
+          const result = await res.json();
+
+          if (!res.ok) {
+            throw new Error(result.error || 'Erreur paiement');
+          }
+
+          if (result.demo) {
+            // Mode démo — paiement simulé
+            alert('✅ Paiement simulé (BICTORYS_API_KEY non configuré).\\n\\nPour activer les vrais paiements :\\n1. Créez un compte marchand Bictorys\\n2. Récupérez votre clé API\\n3. Ajoutez-la dans Vercel → Settings → Environment Variables → BICTORYS_API_KEY\\n\\nSur Vercel, redéployez ensuite le projet.');
+            // Recharge pour montrer le statut PAYE
+            location.reload();
+            return;
+          }
+
+          if (result.checkoutUrl) {
+            // Redirige vers la page de paiement Bictorys
+            window.location.href = result.checkoutUrl;
+          } else {
+            throw new Error('URL de checkout manquante');
+          }
+        } catch(err) {
+          alert('❌ Erreur : ' + err.message);
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Payer maintenant via Bictorys';
+          }
+        }
       }
       </script>
     </div>
@@ -1341,8 +1377,8 @@ function updateEstimate() {
   }
 }
 
-// === BOOKING FORM SUBMIT (localStorage) ===
-document.getElementById('booking-form').addEventListener('submit', function(e) {
+// === BOOKING FORM SUBMIT (API backend) ===
+document.getElementById('booking-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const formData = new FormData(this);
   const data = Object.fromEntries(formData);
@@ -1355,12 +1391,30 @@ document.getElementById('booking-form').addEventListener('submit', function(e) {
   const num = Math.floor(1000 + Math.random() * 9000);
   const tracking = `NOMAT-${random}-${num}`;
   
-  // Save to localStorage
+  // Save via backend API
   try {
-    const bookings = JSON.parse(localStorage.getItem('nomat-bookings') || '[]');
-    bookings.push({ ...data, reference, tracking, statut: 'EN_PREPARATION', date: new Date().toISOString() });
-    localStorage.setItem('nomat-bookings', JSON.stringify(bookings));
-  } catch(e) {}
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+      reference = result.reference;
+      tracking = result.trackingNumber;
+    } else {
+      alert('Erreur: ' + (result.error || 'Impossible d\\'enregistrer la réservation'));
+      return;
+    }
+  } catch(err) {
+    // Fallback localStorage si backend KO
+    console.warn('[Booking] API indisponible, fallback localStorage:', err);
+    try {
+      const bookings = JSON.parse(localStorage.getItem('nomat-bookings') || '[]');
+      bookings.push({ ...data, reference, tracking, statut: 'EN_PREPARATION', date: new Date().toISOString() });
+      localStorage.setItem('nomat-bookings', JSON.stringify(bookings));
+    } catch(e) {}
+  }
   
   // Show success
   document.getElementById('success-ref').textContent = reference;
@@ -1381,19 +1435,39 @@ function resetBooking() {
 }
 
 // === TRACKING ===
-document.getElementById('track-form').addEventListener('submit', function(e) {
+document.getElementById('track-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   const numero = document.getElementById('track-input').value.trim().toUpperCase();
   if (!numero) return;
-  
+
+  // Affiche loading
+  document.getElementById('track-result').innerHTML = '<p class="text-sm text-muted text-center py-4">Recherche en cours...</p>';
+
   let booking = null;
+
+  // Appel API backend
   try {
-    const bookings = JSON.parse(localStorage.getItem('nomat-bookings') || '[]');
-    booking = bookings.find(b => b.tracking.toUpperCase() === numero || b.reference.toUpperCase() === numero);
-  } catch(e) {}
-  
-  // Demo parcel
-  if (numero === 'NOMAT-DEMO1-2024') {
+    const res = await fetch('/api/track?numero=' + encodeURIComponent(numero));
+    if (res.ok) {
+      const result = await res.json();
+      if (result.success) {
+        booking = result.tracking;
+      }
+    }
+  } catch(err) {
+    console.warn('[Tracking] API indisponible:', err);
+  }
+
+  // Fallback localStorage si API KO
+  if (!booking) {
+    try {
+      const bookings = JSON.parse(localStorage.getItem('nomat-bookings') || '[]');
+      booking = bookings.find(b => b.tracking.toUpperCase() === numero || b.reference.toUpperCase() === numero);
+    } catch(e) {}
+  }
+
+  // Demo parcel (en mode démo si API KO)
+  if (!booking && numero === 'NOMAT-DEMO1-2024') {
     booking = {
       reference: 'REF-NOMAT-000001', tracking: 'NOMAT-DEMO1-2024',
       expediteurNom: 'Awa Diop', destinataireNom: 'Mamadou Sow',
