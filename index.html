@@ -997,7 +997,7 @@ T_.readability=function(e,t){var n=T_(e),r=T_(t);return(Math.max(n.getLuminance(
         </div>
         <div class="mt-4 p-3 rounded-lg flex items-start gap-2" style="background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.3);">
           <svg class="w-4 h-4 text-gold flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.917 11.917 0 0112 0.5C5.9 0.5 0.5 5.9 0.5 12s5.4 11.5 11.5 11.5S23.5 18.1 23.5 12c0-1.5-.3-2.9-.7-4.2"></path></svg>
-          <p class="text-xs text-muted italic">Membre du réseau Stand'Art — charte qualité du transporteur aérien Sénégal–Amérique du Nord.</p>
+          <!-- Stand'Art mention removed per request -->
         </div>
       </div>
       <div>
@@ -1714,6 +1714,111 @@ updateEstimate();
   } catch (err) {
     console.error('[Globe] init failed:', err);
   }
+})();
+</script>
+
+<!-- ============ ADMIN PANEL ============ -->
+<div id="admin-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.7);">
+  <div class="rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" style="background:var(--bg);border:1px solid var(--border);">
+    <div class="flex items-center justify-between p-4 border-b" style="border-color:var(--border);">
+      <h3 class="text-lg font-bold text-gold">Admin NOMAT GP</h3>
+      <button onclick="closeAdmin()" class="text-muted hover:text-fg text-2xl">✕</button>
+    </div>
+    <div id="admin-content" class="overflow-y-auto p-4" style="max-height:80vh;">
+      <div id="admin-login">
+        <p class="text-sm text-muted mb-3">Entrez le mot de passe admin :</p>
+        <input type="password" id="admin-pwd" placeholder="Mot de passe" class="w-full px-3 py-2 rounded-md mb-3" style="background:var(--bg);border:1px solid var(--border);color:var(--fg);"/>
+        <button onclick="adminLogin()" class="px-4 py-2 rounded-md bg-gold text-primary-fg font-bold">Se connecter</button>
+        <p class="text-xs text-muted mt-2">Astuce : visitez <code>?admin=1</code> ou Ctrl+Shift+A</p>
+      </div>
+      <div id="admin-dashboard" class="hidden">
+        <div id="admin-stats" class="grid grid-cols-3 gap-3 mb-4"></div>
+        <div id="admin-bookings-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// Admin : accessible via #admin, ?admin=1, ou Ctrl+Shift+A
+(function() {
+  function openAdmin() {
+    document.getElementById('admin-modal').classList.remove('hidden');
+  }
+  if (location.hash === '#admin' || new URLSearchParams(location.search).get('admin') === '1') {
+    openAdmin();
+  }
+  window.addEventListener('hashchange', function() { if (location.hash === '#admin') openAdmin(); });
+  window.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') { e.preventDefault(); openAdmin(); }
+  });
+  window.closeAdmin = function() {
+    document.getElementById('admin-modal').classList.add('hidden');
+    if (location.hash === '#admin') history.replaceState(null, '', location.pathname);
+  };
+  window.adminLogin = async function() {
+    const pwd = document.getElementById('admin-pwd').value;
+    try {
+      const res = await fetch('/api/admin/bookings', { headers: { 'X-Admin-Password': pwd } });
+      const data = await res.json();
+      if (!res.ok) { alert('Mot de passe incorrect'); return; }
+      document.getElementById('admin-login').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      window._adminPwd = pwd;
+      renderAdminBookings(data.bookings || []);
+    } catch(err) {
+      // Fallback localStorage
+      const local = JSON.parse(localStorage.getItem('nomat-bookings') || '[]');
+      if (local.length > 0) {
+        document.getElementById('admin-login').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        renderAdminBookings(local);
+      } else {
+        alert('API indisponible (KV non configuré ?) et aucune réservation locale.');
+      }
+    }
+  };
+  function renderAdminBookings(bookings) {
+    const stats = document.getElementById('admin-stats');
+    const total = bookings.length;
+    const transit = bookings.filter(b => b.statut === 'EN_TRANSIT').length;
+    const livre = bookings.filter(b => b.statut === 'LIVRE').length;
+    stats.innerHTML = [
+      { l: 'Total', v: total }, { l: 'En transit', v: transit }, { l: 'Livrés', v: livre }
+    ].map(s => '<div class="p-3 rounded-lg" style="background:var(--card);border:1px solid var(--border);"><p class="text-2xl font-black">'+s.v+'</p><p class="text-xs text-muted">'+s.l+'</p></div>').join('');
+
+    const list = document.getElementById('admin-bookings-list');
+    if (!bookings.length) { list.innerHTML = '<p class="text-sm text-muted text-center py-8">Aucune réservation.</p>'; return; }
+    list.innerHTML = bookings.map(b => {
+      const statutLabels = { EN_PREPARATION: 'En préparation', EN_TRANSIT: 'En transit', EN_DOUANE: 'En douane', LIVRE: 'Livré', ANNULE: 'Annulé' };
+      return '<div class="p-3 rounded-lg mb-2" style="background:var(--card);border:1px solid var(--border);">'+
+        '<div class="flex justify-between items-start mb-2">'+
+          '<div><span class="text-sm font-bold text-gold">'+(b.reference||'REF?')+'</span> <span class="text-xs text-muted">'+(b.trackingNumber||b.tracking||'')+'</span></div>'+
+          '<span class="text-xs px-2 py-1 rounded" style="background:rgba(245,158,11,0.1);">'+(statutLabels[b.statut]||b.statut)+'</span>'+
+        '</div>'+
+        '<p class="text-xs text-muted">'+(b.expediteurNom||'?')+' → '+(b.destinataireNom||'?')+' ('+(b.poids||'?')+'kg, '+(b.villeDestination||'?')+')</p>'+
+        '<p class="text-xs text-muted mt-1">Paiement: '+(b.statutPaiement||'?')+' · '+(b.modePaiement||'?')+' · '+(b.modalitePaiement||'?')+'</p>'+
+        '<select onchange="updateStatut(\''+(b.reference||'')+'\', this.value)" class="mt-2 text-xs px-2 py-1 rounded" style="background:var(--bg);border:1px solid var(--border);color:var(--fg);">'+
+          ['EN_PREPARATION','EN_TRANSIT','EN_DOUANE','LIVRE','ANNULE'].map(s => '<option value="'+s+'" '+(b.statut===s?'selected':'')+'>'+(statutLabels[s]||s)+'</option>').join('')+
+        '</select>'+
+      '</div>';
+    }).join('');
+  }
+  window.updateStatut = async function(ref, statut) {
+    if (!window._adminPwd) return; // Mode localStorage — pas d'update API
+    try {
+      await fetch('/api/admin/bookings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': window._adminPwd },
+        body: JSON.stringify({ reference: ref, statut })
+      });
+      // Recharge
+      const res = await fetch('/api/admin/bookings', { headers: { 'X-Admin-Password': window._adminPwd } });
+      const data = await res.json();
+      renderAdminBookings(data.bookings || []);
+    } catch(err) {
+      alert('Erreur mise à jour: ' + err.message);
+    }
+  };
 })();
 </script>
 
